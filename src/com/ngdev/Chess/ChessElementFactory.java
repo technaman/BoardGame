@@ -3,7 +3,7 @@ package com.ngdev.Chess;
 import com.ngdev.Games.Factories.GameElementFactory;
 import com.ngdev.Games.GameElement;
 
-public class ChessElementFactory implements GameElementFactory {
+public class ChessElementFactory {
 
     private ChessElementFactory INSTANCE;
 
@@ -18,12 +18,10 @@ public class ChessElementFactory implements GameElementFactory {
         return INSTANCE;
     }
 
-    @Override
     public ChessElement getDefaultElement() {
         return new ChessElement();
     }
 
-    @Override
     public GameElement getRandomElement(int boardWidth, int boardHeight) {
         return null;
     }

@@ -23,12 +23,18 @@ public class SnakeLadderPlayer extends Player {
         try {
             System.out.println("Dear " + user.getName() + ". Please roll the dice.");
             diceRoll = Integer.parseInt(br.readLine());
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
+            //ignored.
+            return generateMove();
         }
 
         System.out.println(this.toString() + " and I rolled a " + diceRoll);
         return new SnakeLadderMove(diceRoll);
+    }
+
+    @Override
+    public String getName() {
+        return user.getName();
     }
 
     @Override

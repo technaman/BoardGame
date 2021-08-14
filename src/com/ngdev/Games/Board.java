@@ -1,8 +1,9 @@
 package com.ngdev.Games;
 
+import com.ngdev.SnakeLadder.SnakeLadderCell;
+
 import java.util.List;
 
 public interface Board {
-    List<List<Cell>> getCurrentState();
-    boolean isAnyCellEmpty();
+    Cell generateRandomCellPosition();
 }

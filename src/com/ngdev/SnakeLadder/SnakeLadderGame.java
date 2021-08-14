@@ -10,12 +10,12 @@ import java.util.Map;
 
 public class SnakeLadderGame implements com.ngdev.Games.Game {
 
-    private final int snakesCount, laddersCount, boardWidth, boardHeight;
+    private final int snakesCount, laddersCount;
     private List<Player> playersList;
     private int playerWithTurn;
-    private GameStats gameStats;
+    private SnakeLadderGameStats gameStats;
     private SnakeLadderBoard board;
-    private Map<Player, Cell> playerLocations;
+    private Map<Player, SnakeLadderCell> playerLocations;
     private ArrayList<SnakeLadderElement> elements;
     private RoundRobinTurnTracker roundRobinTurnTracker;
     private GameState gameState;
@@ -23,8 +23,7 @@ public class SnakeLadderGame implements com.ngdev.Games.Game {
     private SnakeLadderGame(Builder builder) {
         this.snakesCount = builder.snakesCount;
         this.laddersCount = builder.laddersCount;
-        this.boardWidth = builder.boardWidth;
-        this.boardHeight = builder.boardHeight;
+        this.board = builder.board;
         this.playersList = builder.playersList;
         playerWithTurn = 0;
         roundRobinTurnTracker = new RoundRobinTurnTracker(playersList.size());
@@ -32,7 +31,7 @@ public class SnakeLadderGame implements com.ngdev.Games.Game {
 
     @Override
     public GameStats getStats() {
-        return null;
+        return gameStats;
     }
 
     @Override
@@ -48,20 +47,24 @@ public class SnakeLadderGame implements com.ngdev.Games.Game {
     @Override
     public void initialize() {
         System.out.println("Initializing Classic Snake Ladder Game. Please Wait !");
-        this.elements = new ArrayList<SnakeLadderElement>();
+        this.elements = new ArrayList<>();
         this.playerLocations = new HashMap<>();
         for(Player player: playersList){
-            playerLocations.put(player, Cell.getStartingPosition());
+            playerLocations.put(player, SnakeLadderCell.getStartingPosition());
         }
 
         for(int s = 0; s < snakesCount; s++){
-            elements.add(SnakeLadderElementFactory.getInstance().getRandomSnake(boardWidth, boardHeight));
+            elements.add(SnakeLadderElementFactory.getInstance().getRandomSnake());
+        }
+        for(int l = 0; l < laddersCount; l++){
+            elements.add(SnakeLadderElementFactory.getInstance().getRandomLadder());
         }
 
-        for(int l = 0; l < laddersCount; l++){
-            elements.add(SnakeLadderElementFactory.getInstance().getRandomLadder(boardWidth, boardHeight));
-        }
+        board.addGameElements(elements);
+
         gameState = GameState.IN_PROGRESS;
+        gameStats = new SnakeLadderGameStats(gameState);
+
     }
 
     @Override
@@ -70,47 +73,64 @@ public class SnakeLadderGame implements com.ngdev.Games.Game {
     }
 
     @Override
-    public boolean isMoveValid(Move move) {
+    public boolean isMoveValid(Move move) throws InvalidLocationException {
         int roll = move.getRoll();
-        return (roll > 0 && roll <= 6);
-        //TODO: Add a logic for move validation
+        if (roll < 1 || roll > 6) return false;
+
+        board.checkLocationOutOfBounds(playerLocations.get(getPlayerWithTurn()), roll);
+
+        return true;
     }
 
     @Override
     public void makeMove(Move move) throws ValidationException {
-        if(!isMoveValid(move)){
-            throw new ValidationException("Move is not valid.");
+        try {
+            if(!isMoveValid(move)){
+                throw new ValidationException("Invalid dice roll. Please try again.");
+            }
+        } catch (ValidationException e) {
+            playerWithTurn = roundRobinTurnTracker.getNext();
+            throw e;
         }
-        System.out.println("Making the move " + move.toString());
         int roll = move.getRoll();
         Player player = getPlayerWithTurn();
-        Cell location = playerLocations.get(player);
-        int x = ((int)location.getX() + roll)%boardWidth;
-        int y = ((int)location.getX() + roll)/boardWidth + (int)location.getY();
-        Cell newLocation = new Cell(x, y);
+        SnakeLadderCell currentLocation = playerLocations.get(player);
+        SnakeLadderCell newLocation = board.getNewLocation(currentLocation, roll);
+
+        if(board.hasSnake(newLocation) || board.foundLadder(newLocation)) {
+            newLocation = board.getDestination(newLocation);
+        }
+
         playerLocations.put(player, newLocation);
+
+        System.out.println("Player " + player.getName() + " moved to cell# " + board.getCellNumber(newLocation));
 
         if(checkPlayerAtWinningCell(newLocation)){
             // the current player has won the game!
+            gameStats.setWinner(player);
             gameState = GameState.ENDED;
+            gameStats.setGameState(gameState);
         } else {
             // make sure that the turn is advanced
             playerWithTurn = roundRobinTurnTracker.getNext();
         }
     }
 
-    private boolean checkPlayerAtWinningCell(Cell newLocation) {
-        return (newLocation.getY() == boardHeight - 1 && newLocation.getX() == boardWidth - 1);
+    private boolean checkPlayerAtWinningCell(SnakeLadderCell newLocation) {
+        return board.checkPlayerAtWinningCell(newLocation);
     }
 
     @Override
     public boolean IsDrawn() {
         return false;
+
+        //TODO: add a draw logic
     }
 
     public static class Builder {
         private int snakesCount, laddersCount, boardWidth, boardHeight;
         private List<Player> playersList;
+        private SnakeLadderBoard board;
 
         public Builder(){}
 
@@ -146,6 +166,9 @@ public class SnakeLadderGame implements com.ngdev.Games.Game {
             if(boardWidth < 3 || boardHeight < 3){
                 throw new InvalidBoardSizeException("Board Size should be at least 3 * 3");
             }
+
+            this.board = new SnakeLadderBoard(boardWidth, boardHeight);
+
             return new SnakeLadderGame(this);
         }
     }

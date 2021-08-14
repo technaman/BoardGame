@@ -14,7 +14,7 @@ public interface Game {
 
     boolean isOver();
 
-    boolean isMoveValid(Move move);
+    boolean isMoveValid(Move move) throws InvalidLocationException;
 
     void makeMove(Move move) throws ValidationException;
 

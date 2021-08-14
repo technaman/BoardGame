@@ -10,4 +10,11 @@ public abstract class Cell extends Point {
         super(x, y);
     }
 
+    @Override
+    public String toString() {
+        return "Cell {" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
+    }
 }

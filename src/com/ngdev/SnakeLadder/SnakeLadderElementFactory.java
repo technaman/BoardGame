@@ -1,7 +1,7 @@
 package com.ngdev.SnakeLadder;
 
-import com.ngdev.Games.Factories.GameElementFactory;
 import com.ngdev.Games.GameElement;
+import com.ngdev.Games.Factories.GameElementFactory;
 
 public class SnakeLadderElementFactory implements GameElementFactory {
     private static SnakeLadderElementFactory INSTANCE;
@@ -24,18 +24,15 @@ public class SnakeLadderElementFactory implements GameElementFactory {
         return null;
     }
 
-    @Override
-    public SnakeLadderElement getRandomElement(int boardWidth, int boardHeight) {
-        Cell start = Utils.generateRandomCellPosition(boardWidth, boardHeight);
-        Cell end = Utils.generateRandomCellPosition(boardWidth, boardHeight);
-        return new SnakeLadderElement(start, end);
+    public SnakeLadderElement getRandomElement(boolean isSnake) {
+        return new SnakeLadderElement(isSnake);
     }
 
-    public SnakeLadderElement getRandomSnake(int boardWidth, int boardHeight) {
-        return getRandomElement(boardWidth, boardHeight);
+    public SnakeLadderElement getRandomSnake() {
+        return getRandomElement(true);
     }
 
-    public SnakeLadderElement getRandomLadder(int boardWidth, int boardHeight) {
-        return getRandomElement(boardWidth, boardHeight);
+    public SnakeLadderElement getRandomLadder() {
+        return getRandomElement(false);
     }
 }

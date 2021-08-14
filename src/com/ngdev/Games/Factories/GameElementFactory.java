@@ -10,5 +10,4 @@ public interface GameElementFactory {
 
     GameElement getDefaultElement();
 
-    GameElement getRandomElement(int boardWidth, int boardHeight);
 }
