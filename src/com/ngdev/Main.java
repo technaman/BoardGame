@@ -23,8 +23,8 @@ public class Main {
         User one = new User("One");
         User two = new User("Two");
 
-        SnakeLadderPlayer snakeLadderPlayer1 = new SnakeLadderPlayer(one, "Green");
-        SnakeLadderPlayer snakeLadderPlayer2 = new SnakeLadderPlayer(two, "Blue");
+        SnakeLadderPlayer snakeLadderPlayer1 = new SnakeLadderPlayer(one, '$');
+        SnakeLadderPlayer snakeLadderPlayer2 = new SnakeLadderPlayer(two, '*');
 
         playerList.add(snakeLadderPlayer1);
         playerList.add(snakeLadderPlayer2);

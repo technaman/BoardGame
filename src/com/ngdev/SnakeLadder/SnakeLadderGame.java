@@ -15,7 +15,6 @@ public class SnakeLadderGame implements com.ngdev.Games.Game {
     private int playerWithTurn;
     private SnakeLadderGameStats gameStats;
     private SnakeLadderBoard board;
-    private Map<Player, SnakeLadderCell> playerLocations;
     private ArrayList<SnakeLadderElement> elements;
     private RoundRobinTurnTracker roundRobinTurnTracker;
     private GameState gameState;
@@ -48,10 +47,6 @@ public class SnakeLadderGame implements com.ngdev.Games.Game {
     public void initialize() {
         System.out.println("Initializing Classic Snake Ladder Game. Please Wait !");
         this.elements = new ArrayList<>();
-        this.playerLocations = new HashMap<>();
-        for(Player player: playersList){
-            playerLocations.put(player, SnakeLadderCell.getStartingPosition());
-        }
 
         for(int s = 0; s < snakesCount; s++){
             elements.add(SnakeLadderElementFactory.getInstance().getRandomSnake());
@@ -61,6 +56,7 @@ public class SnakeLadderGame implements com.ngdev.Games.Game {
         }
 
         board.addGameElements(elements);
+        board.initPlayerLocations(playersList);
 
         gameState = GameState.IN_PROGRESS;
         gameStats = new SnakeLadderGameStats(gameState);
@@ -78,7 +74,7 @@ public class SnakeLadderGame implements com.ngdev.Games.Game {
         int roll = move.getRoll();
         if (roll < 1 || roll > 6) return false;
 
-        board.checkLocationOutOfBounds(playerLocations.get(getPlayerWithTurn()), roll);
+        board.checkLocationOutOfBounds(board.getPlayerLocation(getPlayerWithTurn()), roll);
 
         return true;
     }
@@ -95,8 +91,7 @@ public class SnakeLadderGame implements com.ngdev.Games.Game {
         }
         int roll = move.getRoll();
         Player player = getPlayerWithTurn();
-        SnakeLadderCell currentLocation = playerLocations.get(player);
-        SnakeLadderCell newLocation = board.getNewLocation(currentLocation, roll);
+        SnakeLadderCell newLocation = board.getNewLocation(player, roll);
 
         if(board.hasSnake(newLocation)){
             System.out.println("Bit by snake at cell#:" + board.getCellNumber(newLocation));
@@ -107,8 +102,9 @@ public class SnakeLadderGame implements com.ngdev.Games.Game {
             newLocation = board.getDestination(newLocation);
         }
 
-        playerLocations.put(player, newLocation);
+        board.updatePlayerLocation(player, newLocation);
 
+        board.printBoard();
         System.out.println("Player " + player.getName() + " moved to cell# " + board.getCellNumber(newLocation));
 
         if(checkPlayerAtWinningCell(newLocation)){

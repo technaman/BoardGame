@@ -4,9 +4,7 @@ import com.ngdev.Games.Cell;
 import com.ngdev.Games.InvalidLocationException;
 import com.ngdev.Games.Player;
 
-import java.util.Map;
-import java.util.List;
-import java.util.HashMap;
+import java.util.*;
 
 public class SnakeLadderBoard implements com.ngdev.Games.Board {
     private int boardWidth;
@@ -15,6 +13,8 @@ public class SnakeLadderBoard implements com.ngdev.Games.Board {
 
     private Map<SnakeLadderCell, SnakeLadderElement> startingLocation;
     private Map<SnakeLadderElement, SnakeLadderCell> destination;
+    private Map<Player, SnakeLadderCell> playerCellMapping = new HashMap<>();
+    private Map<SnakeLadderCell, List<Player>> cellPlayersMapping = new HashMap<>();
 
     public SnakeLadderBoard(int boardWidth, int boardHeight) {
         this.boardWidth = boardWidth;
@@ -78,6 +78,11 @@ public class SnakeLadderBoard implements com.ngdev.Games.Board {
         }
     }
 
+    public SnakeLadderCell getNewLocation(Player player, int roll){
+        SnakeLadderCell currentLocation = playerCellMapping.get(player);
+        return getNewLocation(currentLocation, roll);
+    }
+
     public SnakeLadderCell getNewLocation(SnakeLadderCell currentLocation, int roll) {
         int x = ((int) currentLocation.getX() + roll) % boardWidth;
         int y = ((int) currentLocation.getX() + roll) / boardWidth + (int) currentLocation.getY();
@@ -107,6 +112,31 @@ public class SnakeLadderBoard implements com.ngdev.Games.Board {
         }
         return newLocation;
     }
+    public void initPlayerLocations(List<Player> players){
+        for(Player player: players){
+            updatePlayerLocation(player, SnakeLadderCell.getStartingPosition());
+        }
+    }
+
+    public void updatePlayerLocation(Player player, SnakeLadderCell newLocation){
+        SnakeLadderCell oldLocation = playerCellMapping.get(player);
+        playerCellMapping.put(player, newLocation);
+        List<Player> players;
+        if(cellPlayersMapping.containsKey(oldLocation)){
+            players = cellPlayersMapping.get(oldLocation);
+            players.remove(player);
+        }
+        if(cellPlayersMapping.containsKey(newLocation)) {
+            players = cellPlayersMapping.get(newLocation);
+            players.add(player);
+        } else {
+            cellPlayersMapping.put(newLocation, new ArrayList<>(Arrays.asList(player)));
+        }
+    }
+
+    public SnakeLadderCell getPlayerLocation(Player player){
+        return playerCellMapping.get(player);
+    }
 
 
     public SnakeLadderCell generateRandomCellPosition() {
@@ -117,7 +147,7 @@ public class SnakeLadderBoard implements com.ngdev.Games.Board {
 
     public void printBoard(){
         System.out.println("Snakes & Ladders Board");
-        String divider = "_".repeat(boardWidth * boardWidth/2);
+        String divider = "_".repeat(boardWidth * boardWidth);
         for(int row = boardHeight; row >= 1; row--){
             System.out.println(divider);
             String boardRow = "";
@@ -125,13 +155,22 @@ public class SnakeLadderBoard implements com.ngdev.Games.Board {
                 SnakeLadderCell cell = new SnakeLadderCell(col, row);
                 String printValue = "" + getCellNumber(cell);
                 if(foundLadder(cell)) {
-                    printValue += 'L';
+                    printValue += "(L)";
                 }
                 if(hasSnake(cell)) {
-                    printValue += 'S';
+                    printValue += "(S)";
                 }
-                int paddingValue = 5 - printValue.length();
-                printValue += " ".repeat(paddingValue);
+
+                if(cellPlayersMapping.containsKey(cell)){
+                    List<Player> players = cellPlayersMapping.get(cell);
+                    for(Player player: players){
+                        printValue = printValue + "[" + player.getSymbol() + "]";
+                    }
+                }
+
+
+                int paddingValue = 8 - printValue.length();
+                printValue += " ".repeat(paddingValue >= 0 ? paddingValue : 0);
 
                 if(row%2 == 0) {
                     boardRow += printValue;
@@ -139,7 +178,7 @@ public class SnakeLadderBoard implements com.ngdev.Games.Board {
                     boardRow = printValue + boardRow;
                 }
             }
-            System.out.println(boardRow);
+            System.out.println("|    " + boardRow + " |");
         }
         System.out.println(divider);
     }

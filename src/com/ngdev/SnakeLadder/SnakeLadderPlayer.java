@@ -9,12 +9,16 @@ import java.io.InputStreamReader;
 
 public class SnakeLadderPlayer extends Player {
     private User user;
-    private String symbol;
+    private char symbol;
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-    public SnakeLadderPlayer(User user, String symbol) {
+    public SnakeLadderPlayer(User user, char symbol) {
         this.user = user;
         this.symbol = symbol;
+    }
+
+    public char getSymbol() {
+        return symbol;
     }
 
     @Override
