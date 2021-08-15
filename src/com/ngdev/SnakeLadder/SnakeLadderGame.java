@@ -65,6 +65,7 @@ public class SnakeLadderGame implements com.ngdev.Games.Game {
         gameState = GameState.IN_PROGRESS;
         gameStats = new SnakeLadderGameStats(gameState);
 
+        board.printBoard();
     }
 
     @Override
@@ -97,7 +98,12 @@ public class SnakeLadderGame implements com.ngdev.Games.Game {
         SnakeLadderCell currentLocation = playerLocations.get(player);
         SnakeLadderCell newLocation = board.getNewLocation(currentLocation, roll);
 
-        if(board.hasSnake(newLocation) || board.foundLadder(newLocation)) {
+        if(board.hasSnake(newLocation)){
+            System.out.println("Bit by snake at cell#:" + board.getCellNumber(newLocation));
+            newLocation = board.getDestination(newLocation);
+        }
+        if(board.foundLadder(newLocation)) {
+            System.out.println("Found a ladder at cell#:" + board.getCellNumber(newLocation));
             newLocation = board.getDestination(newLocation);
         }
 

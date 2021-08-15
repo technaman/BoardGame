@@ -9,7 +9,7 @@ public class SnakeLadderCell extends Cell {
     }
 
     public static SnakeLadderCell getStartingPosition() {
-        return new SnakeLadderCell(0, 0);
+        return new SnakeLadderCell(0, 1);
     }
 
     @Override

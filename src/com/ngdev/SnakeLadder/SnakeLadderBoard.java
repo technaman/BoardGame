@@ -2,6 +2,7 @@ package com.ngdev.SnakeLadder;
 
 import com.ngdev.Games.Cell;
 import com.ngdev.Games.InvalidLocationException;
+import com.ngdev.Games.Player;
 
 import java.util.Map;
 import java.util.List;
@@ -54,18 +55,16 @@ public class SnakeLadderBoard implements com.ngdev.Games.Board {
 
     public boolean hasSnake(SnakeLadderCell cell) {
         boolean hasSnake = startingLocation.containsKey(cell) && startingLocation.get(cell).isSnake();
-        if (hasSnake) System.out.println("Bit by snake at cell#:" + getCellNumber(cell));
         return hasSnake;
     }
 
     public boolean foundLadder(SnakeLadderCell cell) {
         boolean foundLadder = startingLocation.containsKey(cell) && startingLocation.get(cell).isLadder();
-        if (foundLadder) System.out.println("Found a ladder at cell#:" + getCellNumber(cell));
         return foundLadder;
     }
 
     public int getCellNumber(Cell cell) {
-        return (int) (cell.getY() * boardWidth + cell.getX());
+        return (int) ((cell.getY()-1) * boardWidth + cell.getX());
     }
 
     public boolean checkPlayerAtWinningCell(SnakeLadderCell newLocation) {
@@ -114,5 +113,34 @@ public class SnakeLadderBoard implements com.ngdev.Games.Board {
         int x = (int) (Math.random() * boardWidth);
         int y = (int) (Math.random() * boardHeight);
         return new SnakeLadderCell(x, y);
+    }
+
+    public void printBoard(){
+        System.out.println("Snakes & Ladders Board");
+        String divider = "_".repeat(boardWidth * boardWidth/2);
+        for(int row = boardHeight; row >= 1; row--){
+            System.out.println(divider);
+            String boardRow = "";
+            for(int col = boardWidth; col >=1; col--){
+                SnakeLadderCell cell = new SnakeLadderCell(col, row);
+                String printValue = "" + getCellNumber(cell);
+                if(foundLadder(cell)) {
+                    printValue += 'L';
+                }
+                if(hasSnake(cell)) {
+                    printValue += 'S';
+                }
+                int paddingValue = 5 - printValue.length();
+                printValue += " ".repeat(paddingValue);
+
+                if(row%2 == 0) {
+                    boardRow += printValue;
+                } else {
+                    boardRow = printValue + boardRow;
+                }
+            }
+            System.out.println(boardRow);
+        }
+        System.out.println(divider);
     }
 }
